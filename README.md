@@ -1,7 +1,6 @@
+# Ansible Role: ansible-role-thousandeyes-enterprise-agent-linux
 
-# Ansible Role: ansible-teagent
-
-Ansible role for ThousandEyes Enterprise Agent deployment.
+Ansible role for Cisco ThousandEyes Enterprise Agent deployment.
 
 ## Description
 
@@ -102,7 +101,7 @@ install_thousandeyes.yml
   roles:
 #    - common
 #    - rhel-system-roles.timesync
-    - ansible-teagent
+    - ansible-role-thousandeyes-enterprise-agent-linux
 #    - other-roles
 ```
 ## Example using Ansible Vault
@@ -122,7 +121,7 @@ The following are work in progress new features :
 -  [Add CA root certificates to system certificate store](https://docs.thousandeyes.com/product-documentation/enterprise-agents/installing-ca-certificates-on-enterprise-agents)
 -  [Add CA root certificates to Browserbot](https://docs.thousandeyes.com/product-documentation/enterprise-agents/installing-ca-certificates-on-enterprise-agents)
 
-## Contributing to ansible-teagent
+## Contributing to ansible-role-thousandeyes-enterprise-agent-linux
 This project is maintained by the ThousandEyes Customer Engineering team and accepts community contributions.
 If you have a bug or an idea, browse the open issues before [opening a new issue](https://github.com/cisco-open/ansible-role-thousandeyes-enterprise-agent-linux/issues).
 
