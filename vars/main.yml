@@ -1,0 +1,192 @@
+---
+# Copyright (c) 2023 Cisco Systems, Inc. and its affiliates
+# All rights reserved..
+
+# vars file
+
+# Account Group in which the Enterprise Agent will be installed
+# Where can I get the Account Group Token?
+# https://docs.thousandeyes.com/product-documentation/enterprise-agents/where-can-i-get-the-account-group-token
+ACCOUNT_TOKEN: "<account-token>"
+
+# Crash Reporting for Enterprise Agents. Enabled by default. Supported values: 0 or 1
+# https://docs.thousandeyes.com/product-documentation/enterprise-agents/crash-reporting-for-enterprise-agents
+CRASH_REPORTS: "1"
+CRASH_REPORTS_SUPPORTED: ['0', '1']
+
+# BrowserBot component is installed by default. Set the value to "no" to skip the BrowserBot installation.
+# If BrowserBot is already installed, the "no" value won't uninstall it.
+# BrowserBot is not supported on Amazon Linux 2
+# What is BrowserBot?
+# https://docs.thousandeyes.com/product-documentation/enterprise-agents/what-is-browserbot
+INSTALL_BROWSERBOT: "yes"
+
+INSTALL_LOG: "If you save Ansible output to a log, you expose any secret data in your Ansible output, such as passwords and user names. By default Ansible sends output about plays, tasks, and module arguments to your screen (STDOUT) on the control node. If you want to capture Ansible output in a log, you have three options. Visit docs.ansible.com/ansible/latest/reference_appendices/logging.html for more details."
+
+# Install Network Time Protocol service. The default is no.
+# If you don't have any other clock sync mechanism, it is strongly recommended that you install one.
+# https://docs.thousandeyes.com/product-documentation/enterprise-agents/enterprise-agent-deployment-using-linux-package-method#post-installation
+# This section will be deprecated, due to ntp being replaced by timedatectl/timesyncd/chronyd. Apply this instead in a separate role:
+# Ubuntu Time Synchronization
+# https://ubuntu.com/server/docs/network-ntp
+# Red Hat Enterprise Linux (RHEL) System Roles: rhel-system-roles.timesync
+# https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/8/html/configuring_basic_system_settings/getting-started-with-rhel-system-roles_configuring-basic-system-settings
+# https://access.redhat.com/articles/3050101
+# https://github.com/linux-system-roles/timesync
+INSTALL_NTP: "no"
+#INSTALL_NTP: "yes"
+
+# Install a customized /etc/ntp.conf file. 
+# This section will be deprecated, due to ntp being replaced by timedatectl/timesyncd/chronyd. Apply this instead in a separate role:
+# Ubuntu Time Synchronization
+# https://ubuntu.com/server/docs/network-ntp
+# Red Hat Enterprise Linux (RHEL) System Roles: rhel-system-roles.timesync
+# https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/8/html/configuring_basic_system_settings/getting-started-with-rhel-system-roles_configuring-basic-system-settings
+# https://access.redhat.com/articles/3050101
+# https://github.com/linux-system-roles/timesync
+# You might want to use private servers on your private network or public servers in your geographical area: https://www.ntppool.org/zone/@
+# Valid configuration: 
+# A (empty values) 
+# B (INSTALL_NTP_SERVER_CUSTOM1 custom value is set)
+# C (INSTALL_NTP_SERVER_CUSTOM1 and INSTALL_NTP_SERVER_CUSTOM2 custom values are both set)
+# A - the default /etc/ntp.conf configuration file is used and that is using servers from the NTP Pool Project. 
+# You might want to use public servers in your geographical area: https://www.ntppool.org/zone/@
+# B and C - a customized /etc/ntp.conf is used containing the custom NTP servers only. 
+# Example A (default):
+# INSTALL_NTP_SERVER_CUSTOM1: ""
+# INSTALL_NTP_SERVER_CUSTOM2: ""
+# Example B:
+# INSTALL_NTP_SERVER_CUSTOM1: "pool 10.10.10.1"
+# INSTALL_NTP_SERVER_CUSTOM2: ""
+# Example C:
+# INSTALL_NTP_SERVER_CUSTOM1: "pool 10.10.10.1"
+# INSTALL_NTP_SERVER_CUSTOM2: "pool 10.20.20.2"
+INSTALL_NTP_SERVER_CUSTOM1: ""
+INSTALL_NTP_SERVER_CUSTOM2: ""
+
+# Install operating system security updates.
+# Although not enabled by default, you should enable it (INSTALL_OS_UPDATES: "yes") and consult with your Security team in regard to your company software update policy.
+INSTALL_OS_UPDATES: "no"
+
+# Proxy settings for ThousandEyes Agent
+# Proxy type must be DIRECT, STATIC, or PAC
+PROXY_TYPE_SUPPORTED: ['DIRECT', 'STATIC', 'PAC']
+PROXY_TYPE: "DIRECT"
+PROXY_LOCATION: ""
+PROXY_USER: ""
+PROXY_PASS: ""
+PROXY_BYPASS_LIST: ""
+PROXY_AUTH_TYPE_SUPPORTED: ['', 'BASIC', 'NTLM', 'KERBEROS']
+PROXY_AUTH_TYPE: ""
+KDC_USER: ""
+KDC_PASS: ""
+KDC_REALM: ""
+KDC_HOST: ""
+KDC_PORT: "88"
+# https://docs.thousandeyes.com/release-notes/2019/2019-08-20-release-notes#kerberos-rdns-configuration
+KERBEROS_RDNS_SUPPORTED: ['0', '1']
+KERBEROS_RDNS: "1"
+KERBEROS_WHITELIST: ""
+
+# Proxy settings for apt package manager.
+# https://docs.thousandeyes.com/product-documentation/enterprise-agents/configuring-an-enterprise-agent-to-use-a-proxy-server#configuring-proxy-settings-for-the-apt-package-manager-on-ubuntu
+APT_PROXY_HOSTNAME: ""
+APT_PROXY_PORT: "80"
+APT_PROXY_USERNAME: ""
+APT_PROXY_PASSWORD: ""
+
+# Proxy settings for yum package manager.
+# https://docs.thousandeyes.com/product-documentation/enterprise-agents/configuring-an-enterprise-agent-to-use-a-proxy-server#configuring-proxy-settings-for-the-yum-package-manager-on-rhel-centos-oracle-linux
+YUM_PROXY_HOSTNAME: ""
+YUM_PROXY_PORT: "80"
+YUM_PROXY_USERNAME: ""
+YUM_PROXY_PASSWORD: ""
+ 
+# Make sure your hosts are configured with repositories that satisfy dependency packages.
+# This playbook won't enable other repositories than ThousandEyes repository.
+# Depending on your distribution, additional repositories may be required. 
+# Eg.
+# http://yum.thousandeyes.com/CentOS/7/te-agent-dependencies.txt
+# http://yum.thousandeyes.com/CentOS/7/te-browserbot-dependencies.txt
+# or
+# http://apt.thousandeyes.com/dists/bionic/te-agent-dependencies.txt
+# http://apt.thousandeyes.com/dists/bionic/te-browserbot-dependencies.txt
+# Default ThousandEyes repository for RHEL based OS
+REDHAT_REPOSITORY: "https://yum.thousandeyes.com"
+# Default ThousandEyes repository for DEBIAN based OS (Ubuntu)
+DEBIAN_REPOSITORY: "https://apt.thousandeyes.com/"
+# Skip the repository creation. The default value is "no"
+SKIP_REPO_CREATION: "no"
+
+# Add Oracle Linux Addons repository
+# https://docs.thousandeyes.com/product-documentation/enterprise-agents/install-the-enterprise-agent-with-browserbot-on-oracle-linux-server-7
+# Requires SKIP_REPO_CREATION: "no" and INSTALL_BROWSERBOT: "yes"
+# Default: enable ol7_addons repository
+#SKIP_ORACLE_OPTIONAL_REPO: "yes"
+SKIP_ORACLE_OPTIONAL_REPO: "no"
+
+# Register RHEL with RedHat Network and consume subscriptions matching Red Hat Enterprise Linux Server; 
+# rhel-7-server-rpms repository will be enabled automatically.
+# Requires SKIP_REPO_CREATION: "no"
+# Default: register with RHN
+#RHN_REGISTER: "no"
+RHN_REGISTER: "yes"
+# Enable rhel-7-server-extras-rpms repository
+# Requires SKIP_REPO_CREATION: "no" and RHN_REGISTER: "yes" and INSTALL_BROWSERBOT: "yes"
+# Missing dependencies for Enterprise Agent on Redhat Enterprise Linux RHEL 7 installation
+# https://docs.thousandeyes.com/product-documentation/enterprise-agents/missing-dependencies-for-enterprise-agent-on-redhat-enterprise-linux-rhel-7-installation
+# Default: enable rhel-7-server-extras-rpms repository 
+#SKIP_REDHAT_OPTIONAL_REPO: "yes"
+SKIP_REDHAT_OPTIONAL_REPO: "no"
+# RedHat Network username
+# Requires RHN_REGISTER: "yes"
+RHN_USERNAME: ""
+# RedHat Network password
+# Requires RHN_REGISTER: "yes"
+RHN_PASSWORD: ""
+# Subscribe to a specific pool by ID
+# Requires RHN_REGISTER: "yes"
+# sudo subscription-manager list [--available | --consumed]
+RHN_POOL_ID1: ""
+
+# For OS detection conditionals
+REDHAT_MINOR: "{{ ansible_facts['distribution_version'][2:3] }}"
+UBUNTU_LSB_DESCRIPTION: "{{ ansible_facts['lsb']['description'] }}"
+
+# Any Ubuntu Desktop is not recommended, will check if any of the following packages is installed
+UBUNTU_DESKTOP: ['ubuntu-desktop', 'kubuntu-desktop', 'xubuntu-desktop', 'lubuntu-desktop', 'lubuntu-gtk-desktop', 'lubuntu-qt-desktop', 'ubuntu-budgie-desktop', 'ubuntu-mate-desktop', 'ubuntustudio-desktop', 'ubuntustudio-desktop-core', 'vanilla-gnome-desktop', 'ubuntu-unity-desktop', 'cinnamon-desktop-environment', 'xfce4']
+# Any Redhat Desktop is not recommended, will check if any of the following packages is installed
+REDHAT_DESKTOP: ['gnome-desktop3', 'gnome-session', 'kde-workspace', 'cinnamon', 'mate-desktop', 'xfdesktop', 'lxqt-session']
+# Set SKIP_DESKTOP_CHECK: "yes" to skip desktop OS checks; this will speed up the overall execution time.
+# If you intend to run the Enterprise Agent on a desktop, keep in mind that the desktop environment may consume significant
+# CPU cycles or memory resources.
+SKIP_DESKTOP_CHECK: "no"
+
+# Supported distributions
+REDHAT_MAJOR: ['8', '7', '2']
+SUPPORTED_DISTRIBUTIONS: ['CentOS', 'RedHat', 'OracleLinux', 'Amazon', 'Ubuntu']
+SUPPORTED_REDHAT_DISTRIBUTIONS: ['CentOS', 'RedHat', 'OracleLinux', 'Amazon']
+SUPPORTED_UBUNTU_DISTRIBUTIONS: ['focal']
+
+# The default log path for te-agent is /var/log
+TEAGENT_LOG: "/var/log"
+
+# Recommended total memory MB
+# https://docs.thousandeyes.com/product-documentation/enterprise-agents/enterprise-agent-hardware-requirements 
+# Agent and BrowserBot
+MEM_AGENT_BBOT: 2048
+#MEM_AGENT_BBOT: 1920
+# Agent without BrowserBot
+MEM_AGENT: 1024
+
+# Recommended CPU count is 2
+CPU_CORE_COUNT: 1
+#CPU_CORE_COUNT: 2
+
+# Knowledge Base articles
+KB_SUPPORTED_EA_OS: "https://docs.thousandeyes.com/product-documentation/enterprise-agents/supported-enterprise-agent-operating-systems"
+KB_EA_HARDWARE_REQUIREMENTS: "https://docs.thousandeyes.com/product-documentation/enterprise-agents/enterprise-agent-hardware-requirements"
+
+# Start ThousandEyes service
+# "no" is useful when we don't want this machine to register as new Enterprise Agent at this time. E.g. creating a template image AMI for later deployment
+START_SERVICE: "yes"

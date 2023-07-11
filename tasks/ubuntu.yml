@@ -1,0 +1,100 @@
+---
+# Copyright (c) 2023 Cisco Systems, Inc. and its affiliates
+# All rights reserved.
+
+- name: Detecting Ubuntu operating system distribution release
+  fail:
+    msg:
+      - "This machine's operating system ({{ ansible_facts['distribution'] }}) (codename {{ ansible_facts['distribution_release'] }}) is unsupported by ThousandEyes."
+      - "Refer to {{ KB_SUPPORTED_EA_OS }} for more details."
+  when: (not ansible_facts['distribution_release'] in SUPPORTED_UBUNTU_DISTRIBUTIONS)
+
+- name: Detecting Ubuntu Long-term support version
+  fail:
+    msg:
+      - "This machine's operating system ({{ UBUNTU_LSB_DESCRIPTION }}) is unsupported by ThousandEyes."
+      - "Refer to {{ KB_SUPPORTED_EA_OS }} for more details."
+  when: not UBUNTU_LSB_DESCRIPTION is search("LTS")
+
+- name: Detecting Ubuntu Desktop operating system
+  shell: dpkg-query -W {{ item }}
+  register: dpkg_query_output
+  args:
+    executable: /bin/bash
+  failed_when: dpkg_query_output.rc == 0
+  loop: "{{ UBUNTU_DESKTOP }}"
+  when: (SKIP_DESKTOP_CHECK == "no")
+
+- name: Configuring apt proxy
+  template:
+    src: 90proxyapt.j2
+    dest: /etc/apt/apt.conf.d/90proxyapt
+    owner: root
+    group: root
+    mode: '0644'
+  when: APT_PROXY_HOSTNAME != ""
+
+# apt-transport-https allows the use of repositories accessed via the HTTP Secure protocol (HTTPS)
+# net-tools is needed for Cloud & Enterprise Agents > Agent Settings > [Agent name] > System information > Routing Table
+- name: Installing apt-transport-https and net-tools
+  apt:
+    pkg:    
+    - apt-transport-https
+    - net-tools
+    state: latest
+    update_cache: yes
+    cache_valid_time: 3600
+
+- name: Copying the ThousandEyes public key
+  copy:
+    src: files/RPM-GPG-KEY-thousandeyes
+    dest: /root/thousandeyes-apt-key.pub
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Installing the ThousandEyes public key
+  apt_key:
+    id: AA5FBA03CE4EF309B7E3D4E1C99A15F5BE718900
+    file: /root/thousandeyes-apt-key.pub
+#    url: https://apt.thousandeyes.com/thousandeyes-apt-key.pub
+    keyring: /etc/apt/trusted.gpg.d/thousandeyes-apt-key.pub.gpg
+    state: present
+
+- name: Adding repository
+  apt_repository:
+    repo: deb {{ DEBIAN_REPOSITORY }} {{ ansible_facts['distribution_release'] }} main
+    state: present
+    filename: thousandeyes
+    mode: 0644
+    update_cache: yes
+  when: (SKIP_REPO_CREATION == "no")
+
+- name: Installing the ThousandEyes Agent
+  apt:
+    name: te-agent
+    state: latest
+    update_cache: yes
+    cache_valid_time: 3600
+
+- name: Installing Network Time Protocol (NTP)
+  apt:
+    name: ntp
+    state: latest
+    update_cache: yes
+    cache_valid_time: 3600
+  when: (INSTALL_NTP == "yes")
+
+- name: Installing ThousandEyes BrowserBot (Package required for Page Load and Transaction tests)
+  apt:
+    name: te-browserbot
+    state: latest
+    update_cache: yes
+    cache_valid_time: 3600
+  async: 1200 
+  poll: 0
+  register: ubuntu_sleeper
+  retries: 2
+  delay: 10  
+  until: ubuntu_sleeper is success
+  when: (INSTALL_BROWSERBOT == "yes")

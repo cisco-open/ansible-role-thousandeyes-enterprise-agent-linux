@@ -1,0 +1,63 @@
+---
+# Copyright (c) 2023 Cisco Systems, Inc. and its affiliates
+# All rights reserved.
+
+- name: Installing security updates on RHEL/OracleLinux/Amazon
+  yum:
+    name: '*'
+    security: yes
+    state: latest
+  when: (ansible_facts['distribution'] == "RedHat" or ansible_facts['distribution'] == "OracleLinux" or ansible_facts['distribution'] == "Amazon")
+
+# CentOS doesn't have any package security metadata
+- name: Installing all updates on CentOS
+  yum:
+    name: '*'
+    state: latest
+  when: (ansible_facts['distribution'] == "CentOS")
+
+- name: Installing security updates on Ubuntu
+  block:
+    - name: Make a copy of security repos - Ubuntu 18
+      blockinfile:
+        path: /etc/apt/sources.list.d/ansible.security.sources.list
+        create: yes
+        block: |
+          deb http://us.archive.ubuntu.com/ubuntu bionic-security main restricted
+          deb http://us.archive.ubuntu.com/ubuntu bionic-security universe
+          deb http://us.archive.ubuntu.com/ubuntu bionic-security multiverse
+      when: (ansible_facts['distribution_release'] == "bionic")
+
+    - name: Make a copy of security repos - Ubuntu 20
+      blockinfile:
+        path: /etc/apt/sources.list.d/ansible.security.sources.list
+        create: yes
+        block: |
+          deb http://us.archive.ubuntu.com/ubuntu focal-security main restricted
+          deb http://us.archive.ubuntu.com/ubuntu focal-security universe
+          deb http://us.archive.ubuntu.com/ubuntu focal-security multiverse
+      when: (ansible_facts['distribution_release'] == "focal")
+
+    - name: Only run "update_cache=yes" if the last one is more than 10 minutes ago
+      apt:
+        update_cache: yes
+        cache_valid_time: 600
+
+    - name: Installing security updates on Ubuntu
+      shell: apt -s upgrade -o Dir::Etc::SourceList=/etc/apt/sources.list.d/ansible.security.sources.list | grep "^Inst" | grep -i security | awk -F " " {'print $2'} | xargs apt install
+      args:
+        executable: /bin/bash
+  when: (ansible_facts['distribution'] == "Ubuntu" and SKIP_REPO_CREATION == "no")
+
+- name: Installing security updates on Ubuntu without repository creation
+  block:
+    - name: Only run "update_cache=yes" if the last one is more than 10 minutes ago
+      apt:
+        update_cache: yes
+        cache_valid_time: 600
+
+    - name: Installing security updates on Ubuntu without repository creation
+      shell: apt -s upgrade | grep "^Inst" | grep -i security | awk -F " " {'print $2'} | xargs apt install
+      args:
+        executable: /bin/bash
+  when: (ansible_facts['distribution'] == "Ubuntu" and SKIP_REPO_CREATION == "yes")

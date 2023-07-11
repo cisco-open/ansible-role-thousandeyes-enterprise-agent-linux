@@ -1,0 +1,21 @@
+---
+# Copyright (c) 2023 Cisco Systems, Inc. and its affiliates
+# All rights reserved.
+
+ACCOUNT_TOKEN: "<token>"
+INSTALL_BROWSERBOT: "yes"
+INSTALL_NTP: "yes"
+INSTALL_OS_UPDATES: "yes"
+RHN_REGISTER: "yes"
+RHN_USERNAME: "rosilviu"
+RHN_PASSWORD: "ReplaceMeSilviuRomontiSuperSecretPassword"
+RHN_POOL_ID1: "ReplaceMe2b85f99a718602c501718f52"
+SKIP_REDHAT_OPTIONAL_REPO: "no"
+SKIP_ORACLE_OPTIONAL_REPO: "no"
+MEM_AGENT_BBOT: 1920
+CPU_CORE_COUNT: 2
+# Example with custom vars file encrypted with the password in vault_password_file; takes precedence over vars/main.yml values.
+# Check Ansible Vault official documentation for more options or details.
+# mv vars-override-cleartext.yml vars-override.yml
+# ansible-vault encrypt --vault-id thousandeyes@vault_password_file vars-override.yml
+# ansible-playbook install_thousandeyes.yml --extra-vars "@vars-override.yml" --vault-id thousandeyes@vault_password_file

@@ -1,0 +1,2 @@
+Acquire::http::proxy  "http://{% if APT_PROXY_USERNAME != "" %}{{APT_PROXY_USERNAME}}:{{APT_PROXY_PASSWORD}}@{% endif %}{{APT_PROXY_HOSTNAME}}:{{APT_PROXY_PORT}}";
+Acquire::https::proxy "http://{% if APT_PROXY_USERNAME != "" %}{{APT_PROXY_USERNAME}}:{{APT_PROXY_PASSWORD}}@{% endif %}{{APT_PROXY_HOSTNAME}}:{{APT_PROXY_PORT}}";

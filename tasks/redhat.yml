@@ -1,0 +1,173 @@
+---
+# Copyright (c) 2023 Cisco Systems, Inc. and its affiliates
+# All rights reserved.
+
+- name: Detecting operating system major version number
+  fail:
+    msg:
+      - "This machine's operating system ({{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_major_version'] }}) is unsupported by ThousandEyes."
+      - "Refer to {{ KB_SUPPORTED_EA_OS }} for more details."
+  when: (not ansible_facts['distribution_major_version'] in REDHAT_MAJOR)
+
+- name: Detecting operating system minor version number
+  fail:
+    msg:
+      - "This machine's operating system ({{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }}) is unsupported by ThousandEyes."
+      - "Refer to {{ KB_SUPPORTED_EA_OS }} for more details."
+  when: (REDHAT_MINOR < "8" and ansible_facts['distribution_major_version'] == "7" and ansible_facts['distribution'] != "Amazon")
+
+- name: Gather the rpm package facts
+  package_facts:
+    manager: auto
+  when: (ansible_facts['distribution_major_version'] == "8" and ansible_facts['distribution'] != "OracleLinux")
+
+- name: Get OracleLinux version
+  command: rpm -q --qf '%{version}' oraclelinux-release
+  args:
+    warn: false
+  register: oraclelinux_release_version
+  changed_when: false
+  check_mode: false
+  when: (ansible_facts['distribution_major_version'] == "8" and ansible_facts['distribution'] == "OracleLinux")
+
+- assert:
+    that: oraclelinux_release_version.stdout is version('8.4', '>=')
+    fail_msg:
+      - "This machine's operating system ({{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }}) is unsupported by ThousandEyes."
+      - "Refer to {{ KB_SUPPORTED_EA_OS }} for more details."
+    quiet: true
+  when: (ansible_facts['distribution_major_version'] == "8" and ansible_facts['distribution'] == "OracleLinux")
+
+- assert:
+    that: ansible_facts.packages['centos-stream-release'][0].version < "8.0"
+    fail_msg:
+      - "This machine's operating system ({{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }}) is unsupported by ThousandEyes."
+      - "Refer to {{ KB_SUPPORTED_EA_OS }} for more details."
+    quiet: true
+  when: (ansible_facts['distribution_major_version'] == "8" and ansible_facts['distribution'] == "CentOS" and ansible_facts.packages['centos-stream-release'] is defined)
+
+- assert:
+    that: ansible_facts.packages['centos-linux-release'][0].version < "8.0"
+    fail_msg:
+      - "This machine's operating system ({{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }}) is unsupported by ThousandEyes."
+      - "Refer to {{ KB_SUPPORTED_EA_OS }} for more details."
+    quiet: true
+  when: (ansible_facts['distribution_major_version'] == "8" and ansible_facts['distribution'] == "CentOS" and ansible_facts.packages['centos-linux-release'] is defined)
+
+- assert:
+    that: ansible_facts.packages['redhat-release'][0].version >= "8.4" and ansible_facts.packages['redhat-release'][0].version != "8.5"
+    fail_msg:
+      - "This machine's operating system ({{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }}) is unsupported by ThousandEyes."
+      - "Refer to {{ KB_SUPPORTED_EA_OS }} for more details."
+    quiet: true
+  when: (ansible_facts['distribution_major_version'] == "8" and ansible_facts['distribution'] == "RedHat" and ansible_facts.packages['redhat-release'] is defined)
+
+- assert:
+    that: ansible_facts.packages['oraclelinux-release'][0].version >= "8.4" and ansible_facts.packages['oraclelinux-release'][0].version != "8.5"
+    fail_msg:
+      - "This machine's operating system ({{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }}) is unsupported by ThousandEyes."
+      - "Refer to {{ KB_SUPPORTED_EA_OS }} for more details."
+    quiet: true
+  when: (ansible_facts['distribution_major_version'] == "8" and ansible_facts['distribution'] == "OracleLinux" and ansible_facts.packages['oraclelinux-release'] is defined)
+
+- name: Detecting Redhat Desktop operating system
+  shell: rpm -q {{ item }}
+  register: rpm_query_output
+  args:
+    executable: /bin/bash
+    warn: no
+  failed_when: rpm_query_output.rc == 0
+  loop: "{{ REDHAT_DESKTOP }}"
+  when: (SKIP_DESKTOP_CHECK == "no")
+
+- name: Adding ThousandEyes repository for CentOS/AmazonLinux
+  yum_repository:
+    name: thousandeyes
+    description: ThousandEyes
+    baseurl: "{{ REDHAT_REPOSITORY }}/{{ ansible_facts['distribution'] }}/{{ ansible_facts['distribution_major_version'] }}/{{ ansible_facts['architecture'] }}"
+    gpgkey: file:///etc/pki/rpm-gpg/RPM-GPG-KEY-thousandeyes
+    gpgcheck: yes
+    enabled: yes
+    owner: root
+    group: root
+    mode: 0644
+  when: (SKIP_REPO_CREATION == "no") and (ansible_facts['distribution'] == "CentOS" or ansible_facts['distribution'] == "Amazon")
+
+- name: Adding ThousandEyes repository for RedHat/OracleLinux
+  yum_repository:
+    name: thousandeyes
+    description: ThousandEyes
+    baseurl: "{{ REDHAT_REPOSITORY }}/RHEL/{{ ansible_facts['distribution_major_version'] }}/{{ ansible_facts['architecture'] }}"
+    gpgkey: file:///etc/pki/rpm-gpg/RPM-GPG-KEY-thousandeyes
+    gpgcheck: yes
+    enabled: yes
+    owner: root
+    group: root
+    mode: 0644
+  when: (SKIP_REPO_CREATION == "no") and (ansible_facts['distribution'] == "RedHat" or ansible_facts['distribution'] == "OracleLinux")
+
+- name: Copying the ThousandEyes public key
+  copy:
+    src: files/RPM-GPG-KEY-thousandeyes
+    dest: /etc/pki/rpm-gpg/RPM-GPG-KEY-thousandeyes
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Installing the ThousandEyes public key
+  rpm_key:
+    state: present
+    key: /etc/pki/rpm-gpg/RPM-GPG-KEY-thousandeyes
+#    key: https://yum.thousandeyes.com/RPM-GPG-KEY-thousandeyes
+    fingerprint: AA5F BA03 CE4E F309 B7E3  D4E1 C99A 15F5 BE71 8900
+
+- name: Include RedHat Linux operating system specific tasks
+  include_tasks: rhel_optional.yml
+  when: (ansible_facts['distribution'] == "RedHat") and (SKIP_REPO_CREATION == "no")
+
+- name: Include Oracle Linux 7 operating system specific tasks
+  include_tasks: oracle_optional.yml
+  when: (ansible_facts['distribution'] == "OracleLinux") and (INSTALL_BROWSERBOT == "yes") and (SKIP_REPO_CREATION == "no") and (SKIP_ORACLE_OPTIONAL_REPO == "no") and (ansible_facts['distribution_major_version'] == "7")
+  
+- name: 
+  blockinfile:
+    path: /etc/yum.conf
+    create: yes
+    block: |
+      proxy=http://{{YUM_PROXY_HOSTNAME}}:{{YUM_PROXY_PORT}}
+      {% if YUM_PROXY_USERNAME != "" %}proxy_username={{YUM_PROXY_USERNAME}}{% endif %}
+      
+      {% if YUM_PROXY_USERNAME != "" %}proxy_password={{YUM_PROXY_PASSWORD}}{% endif %}
+  when: YUM_PROXY_HOSTNAME != ""
+
+# net-tools is needed for Cloud & Enterprise Agents > Agent Settings > [Agent name] > System information > Routing Table
+# yum-utils is needed to determine if a reboot is required
+- name: Install te-agent, te-intl-fonts, ntp and net-tools
+  block:
+    - name: Installing the ThousandEyes Agent
+      yum:
+        name:
+          - te-agent
+          - net-tools
+          - yum-utils
+        state: latest
+        update_cache: yes
+
+    - name: Installing Network Time Protocol (NTP)
+      yum:
+        name: ntp
+        state: latest
+      when: (INSTALL_NTP == "yes")
+
+- name: Installing ThousandEyes BrowserBot (Package required for Page Load and Transaction tests)
+  yum:
+    name: te-browserbot
+    state: latest
+    update_cache: yes
+  async: 1200
+  poll: 0
+  register: redhat_sleeper
+  retries: 2
+  delay: 10
+  until: redhat_sleeper is success
+  when: (INSTALL_BROWSERBOT == "yes") and (ansible_facts['distribution'] != "Amazon")

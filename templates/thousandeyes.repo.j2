@@ -1,0 +1,9 @@
+[thousandeyes]
+name=ThousandEyes
+baseurl={{REDHAT_REPOSITORY}}/{{ ansible_facts['distribution'] }}/{{ ansible_facts['distribution_major_version'] }}/{{ ansible_facts['architecture'] }}
+proxy={{ PROXY_LOCATION }}
+proxy_username={{ PROXY_USER }}
+proxy_password={{ PROXY_PASS }}
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-thousandeyes
+gpgcheck=1
+

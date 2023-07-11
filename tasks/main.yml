@@ -1,0 +1,315 @@
+---
+# Copyright (c) 2023 Cisco Systems, Inc. and its affiliates
+# All rights reserved.
+
+# tasks file
+
+- name: ====================Welcome to ThousandEyes====================
+  debug:
+    msg: "Before running this role, please review and set the appropriate variables. Eg. vars/main.yml"
+
+- name: "{{ INSTALL_LOG }}"
+  debug:
+    msg: "Please review your ansible configuration related to logging ansible output"
+
+- assert:
+    that: ACCOUNT_TOKEN | length ==  32
+    fail_msg: "Account Group Token invalid format"
+    quiet: true
+
+- assert:
+    that: PROXY_TYPE in PROXY_TYPE_SUPPORTED
+    fail_msg: "Proxy type must be DIRECT, STATIC or PAC"
+    quiet: true
+
+- assert:
+    that: PROXY_AUTH_TYPE in PROXY_AUTH_TYPE_SUPPORTED
+    fail_msg: "Proxy auth type must be '', BASIC, NTLM or KERBEROS"
+    quiet: true
+
+- assert:
+    that: KERBEROS_RDNS in KERBEROS_RDNS_SUPPORTED
+    fail_msg: "Kerberos Reverse DNS lookup value can be either 0 or 1"
+    quiet: true
+
+# More validation might be required 
+
+- assert:
+    that: CRASH_REPORTS in CRASH_REPORTS_SUPPORTED
+    fail_msg: "Crash reporting value can be either 0 or 1"
+    quiet: true
+
+- assert:
+    that: APT_PROXY_PORT != ""
+    fail_msg: "APT proxy hostname is defined, but proxy port is not set"
+    quiet: true
+  when: APT_PROXY_HOSTNAME != ""
+
+- assert:
+    that: APT_PROXY_PASSWORD != ""
+    fail_msg: "APT proxy username is defined, but proxy password is not set"
+    quiet: true
+  when: APT_PROXY_USERNAME != ""
+
+- assert:
+    that: YUM_PROXY_PORT != ""
+    fail_msg: "YUM proxy hostname is defined, but proxy port is not set"
+    quiet: true
+  when: YUM_PROXY_HOSTNAME != ""
+
+- assert:
+    that: YUM_PROXY_PASSWORD != ""
+    fail_msg: "YUM proxy username is defined, but proxy password is not set"
+    quiet: true
+  when: YUM_PROXY_USERNAME != ""
+
+- name: Detecting architecture
+  fail:
+    msg: "Unsupported architecture ({{ ansible_facts['architecture'] }})"
+  when: (ansible_facts['architecture'] != "x86_64")
+
+- name: Detecting recomended memory requirements - without BrowserBot
+  fail:
+   msg: "Total memory ({{ ansible_facts['memtotal_mb'] }} MB) on this machine is less than recommneded memory {{ MEM_AGENT }} MB"
+  when: (ansible_facts['memtotal_mb'] < MEM_AGENT) and (INSTALL_BROWSERBOT == "no")
+
+- name: Detecting recomended memory requirements - with BrowserBot
+  fail:
+   msg: "Total memory ({{ ansible_facts['memtotal_mb'] }} MB) on this machine is less than recommneded memory {{ MEM_AGENT_BBOT  }} MB"
+  when: (ansible_facts['memtotal_mb'] < MEM_AGENT_BBOT) and (INSTALL_BROWSERBOT == "yes")
+
+- name: Detecting recommended CPU core count
+  fail:
+   msg: "CPU core count ({{ ansible_facts['processor_cores'] }}) on this machine is less than recommended value ({{ CPU_CORE_COUNT }})"
+  when: (ansible_facts['processor_count'] < CPU_CORE_COUNT)
+
+- name: Detecting operating system
+  fail:
+    msg:
+      - "This machine's operating system ({{ ansible_facts['distribution'] }}) is unsupported by ThousandEyes."
+      - "Refer to {{ KB_SUPPORTED_EA_OS }} for more details."
+  when: (not ansible_facts['distribution'] in SUPPORTED_DISTRIBUTIONS)
+
+- name: Include RedHat operating system specific tasks
+  include_tasks: redhat.yml
+  when: (ansible_facts['distribution'] in SUPPORTED_REDHAT_DISTRIBUTIONS)
+
+- name: Include Ubuntu operating system specific tasks
+  include_tasks: ubuntu.yml
+  when: (ansible_facts['distribution'] == "Ubuntu")
+
+- name: Copying ThousandEyes Agent sample configuration file (/etc/te-agent.cfg)
+  copy:
+    src: /etc/te-agent.cfg.sample
+    dest: /etc/te-agent.cfg
+    remote_src: yes
+    force: yes
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Configuring ThousandEyes Agent - Account Group token
+  lineinfile:
+    path: /etc/te-agent.cfg
+    regexp: '^account-token='
+    line: account-token={{ ACCOUNT_TOKEN }}
+
+- name: Configuring ThousandEyes Agent - log path
+  lineinfile:
+    path: /etc/te-agent.cfg
+    regexp: '^log-path='
+    line: log-path={{ TEAGENT_LOG }}
+
+- name: Configuring ThousandEyes Agent - proxy type
+  lineinfile:
+    path: /etc/te-agent.cfg
+    regexp: '^proxy-type='
+    line: proxy-type={{ PROXY_TYPE }}
+
+- name: Configuring ThousandEyes Agent - proxy location
+  lineinfile:
+    path: /etc/te-agent.cfg
+    regexp: '^proxy-location='
+    line: 'proxy-location={{ PROXY_LOCATION }}'
+  when: (not "DIRECT" in PROXY_TYPE_SUPPORTED)
+
+- name: Configuring ThousandEyes Agent - proxy user
+  lineinfile:
+    path: /etc/te-agent.cfg
+    regexp: '^proxy-user='
+    line: 'proxy-user={{ PROXY_USER }}'
+  when: (not "DIRECT" in PROXY_TYPE_SUPPORTED)
+
+- name: Configuring ThousandEyes Agent - proxy password
+  lineinfile:
+    path: /etc/te-agent.cfg
+    regexp: '^proxy-pass='
+    line: 'proxy-pass={{ PROXY_PASS }}'
+  when: (not "DIRECT" in PROXY_TYPE_SUPPORTED)
+
+- name: Configuring ThousandEyes Agent - proxy bypass list
+  lineinfile:
+    path: /etc/te-agent.cfg
+    regexp: '^proxy-bypass-list='
+    line: 'proxy-bypass-list={{ PROXY_BYPASS_LIST }}'
+  when: (not "DIRECT" in PROXY_TYPE_SUPPORTED)
+
+- name: Configuring ThousandEyes Agent - proxy auth type
+  lineinfile:
+    path: /etc/te-agent.cfg
+    regexp: '^proxy-auth-type='
+    line: proxy-auth-type={{ PROXY_AUTH_TYPE }}
+  when: (not "DIRECT" in PROXY_TYPE_SUPPORTED)
+
+- name: Configuring ThousandEyes Agent - Kerberos realm
+  lineinfile:
+    path: /etc/te-agent.cfg
+    regexp: '^kdc-realm='
+    line: 'kdc-realm={{ KDC_REALM }}'
+  when: (PROXY_AUTH_TYPE == "KERBEROS")
+
+- name: Configuring ThousandEyes Agent - Kerberos username
+  lineinfile:
+    path: /etc/te-agent.cfg
+    regexp: '^kdc-user='
+    line: 'kdc-user={{ KDC_USER }}'
+  when: (PROXY_AUTH_TYPE == "KERBEROS")
+
+- name: Configuring ThousandEyes Agent - Kerberos password
+  lineinfile:
+    path: /etc/te-agent.cfg
+    regexp: '^kdc-pass='
+    line: 'kdc-pass={{ KDC_PASS }}'
+  when: (PROXY_AUTH_TYPE == "KERBEROS")
+
+- name: Configuring ThousandEyes Agent - Kerberos KDC Host
+  lineinfile:
+    path: /etc/te-agent.cfg
+    regexp: '^kdc-host='
+    line: 'kdc-host={{ KDC_HOST }}'
+  when: (PROXY_AUTH_TYPE == "KERBEROS")
+
+- name: Configuring ThousandEyes Agent - Kerberos KDC Port
+  lineinfile:
+    path: /etc/te-agent.cfg
+    regexp: '^kdc-port='
+    line: kdc-port={{ KDC_PORT }}
+  when: (PROXY_AUTH_TYPE == "KERBEROS")
+
+- name: Configuring ThousandEyes Agent - Kerberos reverse DNS lookup
+  lineinfile:
+    path: /etc/te-agent.cfg
+    regexp: '^kerberos-rdns='
+    line: kerberos-rdns={{ KERBEROS_RDNS }}
+  when: (PROXY_AUTH_TYPE == "KERBEROS")
+
+- name: Configuring ThousandEyes Agent - Kerberos whitelist
+  lineinfile:
+    path: /etc/te-agent.cfg
+    regexp: '^kerberos-whitelist='
+    line: 'kerberos-whitelist={{ KERBEROS_WHITELIST }}'
+  when: (PROXY_AUTH_TYPE == "KERBEROS")
+
+- name: Configuring ThousandEyes Agent - crash reporting
+  lineinfile:
+    path: /etc/te-agent.cfg
+    regexp: '^crash-reports='
+    line: crash-reports={{ CRASH_REPORTS }}
+
+- name: Configuring Network Time Protocol custom servers
+  template:
+    src: ntp.conf.j2
+    dest: /etc/ntp.conf
+    owner: root
+    group: root
+    mode: 0644
+  when: (INSTALL_NTP == "yes") and (INSTALL_NTP_SERVER_CUSTOM1 != "") 
+
+- name: Configuring NTP directive (tinker panic 0) for VM
+  lineinfile:
+    path: /etc/ntp.conf
+    line: 'tinker panic 0'
+    insertbefore: BOF
+  when: (INSTALL_NTP == "yes") and (ansible_facts['virtualization_role'] == "guest")
+
+- name: Starting NTP
+  service:
+    name: ntp
+    state: restarted
+    enabled: yes
+  when: (INSTALL_NTP == "yes") and (ansible_facts['distribution'] == "Ubuntu")
+
+- name: Starting NTPD
+  service:
+    name: ntpd
+    state: restarted
+    enabled: yes
+  when: (INSTALL_NTP == "yes") and (ansible_facts['distribution'] in SUPPORTED_REDHAT_DISTRIBUTIONS)
+
+- name: 'Redhat - check if Browserbot installation async task is complete'
+  async_status:
+    jid: "{{ redhat_sleeper.ansible_job_id }}"
+  register: redhat_job_result
+  until: redhat_job_result.finished
+  retries: 480
+  when: (ansible_facts['distribution'] in SUPPORTED_REDHAT_DISTRIBUTIONS) and (INSTALL_BROWSERBOT == "yes") and (ansible_facts['distribution'] != "Amazon")
+
+- name: 'Ubuntu - check if Browserbot installation async task is complete'
+  async_status:
+    jid: "{{ ubuntu_sleeper.ansible_job_id }}"
+  register: ubuntu_job_result
+  until: ubuntu_job_result.finished
+  retries: 480
+  when: (ansible_facts['distribution'] == "Ubuntu") and (INSTALL_BROWSERBOT == "yes")
+
+- name: Include operating system update related tasks
+  include_tasks: updates.yml
+  when: (INSTALL_OS_UPDATES == "yes")
+
+- name: Check and reboot Ubuntu
+  block:
+    - name: Check if reboot is required on Ubuntu
+      stat:
+        path: /var/run/reboot-required
+      register: reboot_required_file
+
+    - name: Rebooting Ubuntu
+      reboot:
+        msg: "Reboot initiated by Ansible"
+        reboot_timeout: 120
+        test_command: "whoami"
+      when: reboot_required_file.stat.exists
+  when: (ansible_facts['distribution'] == "Ubuntu") and (START_SERVICE == "yes")
+
+- name: Check and reboot RedHat
+  block:
+    - name: Check if reboot is required on Redhat
+      command: /usr/bin/needs-restarting -r
+      register: needs_restarting_result
+      failed_when: needs_restarting_result.rc >= 2
+
+    - debug: 
+        msg: "{{ needs_restarting_result.stdout }}"
+
+    - name: Rebooting RedHat
+      reboot:
+        msg: "Reboot initiated by Ansible"
+        reboot_timeout: 120
+        test_command: "whoami"
+      when: "needs_restarting_result.rc == 1"
+  when: (ansible_facts['distribution'] in SUPPORTED_REDHAT_DISTRIBUTIONS) and (START_SERVICE == "yes")
+
+- name: Starting ThousandEyes BrowserBot
+  service:
+    name: te-browserbot
+    state: started
+    enabled: yes
+  when: (INSTALL_BROWSERBOT == "yes") and (ansible_facts['distribution'] != "Amazon")
+
+- name: Starting the ThousandEyes Agent
+  service:
+    name: te-agent
+    state: restarted
+    enabled: yes
+  when: (START_SERVICE == "yes")
+
