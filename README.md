@@ -175,6 +175,6 @@ All rights reserved.
 
 [Ansible Vault]: <https://docs.ansible.com/ansible/latest/user_guide/vault.html>
 
-[Using Vault in playbooks]: <https://docs.ansible.com/ansible/latest/user_guide/playbooks_vault.html>
+[Using Vault in playbooks]: <https://docs.ansible.com/ansible/2.9/user_guide/playbooks_vault.html>
 
 [Logging Ansible output]: <https://docs.ansible.com/ansible/latest/reference_appendices/logging.html>
