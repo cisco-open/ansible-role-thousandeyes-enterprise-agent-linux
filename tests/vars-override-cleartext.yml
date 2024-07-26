@@ -10,8 +10,6 @@ RHN_REGISTER: "yes"
 RHN_USERNAME: "rosilviu"
 RHN_PASSWORD: "ReplaceMeSilviuRomontiSuperSecretPassword"
 RHN_POOL_ID1: "ReplaceMe2b85f99a718602c501718f52"
-SKIP_REDHAT_OPTIONAL_REPO: "no"
-SKIP_ORACLE_OPTIONAL_REPO: "no"
 MEM_AGENT_BBOT: 1920
 CPU_CORE_COUNT: 2
 # Example with custom vars file encrypted with the password in vault_password_file; takes precedence over vars/main.yml values.
