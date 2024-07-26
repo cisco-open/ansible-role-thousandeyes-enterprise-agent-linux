@@ -12,10 +12,3 @@
       - "{{ RHN_POOL_ID1 }}"
     force_register: no
   when: (RHN_REGISTER == "yes")
-
-- name: Enable RHEL7 Extras repository
-  rhsm_repository:
-    name: rhel-7-server-extras-rpms
-    state: enabled
-  when: (RHN_REGISTER == "yes") and (SKIP_REDHAT_OPTIONAL_REPO == "no") and (INSTALL_BROWSERBOT == "yes") and (ansible_facts['distribution_major_version'] == "7")
-

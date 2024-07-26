@@ -246,7 +246,7 @@
     enabled: yes
   when: (INSTALL_NTP == "yes") and (ansible_facts['distribution'] in SUPPORTED_REDHAT_DISTRIBUTIONS)
 
-- name: 'Redhat - check if Browserbot installation async task is complete'
+- name: 'Redhat - installing Browserbot...'
   async_status:
     jid: "{{ redhat_sleeper.ansible_job_id }}"
   register: redhat_job_result
@@ -254,7 +254,7 @@
   retries: 480
   when: (ansible_facts['distribution'] in SUPPORTED_REDHAT_DISTRIBUTIONS) and (INSTALL_BROWSERBOT == "yes") and (ansible_facts['distribution'] != "Amazon")
 
-- name: 'Ubuntu - check if Browserbot installation async task is complete'
+- name: 'Ubuntu - installing Browserbot...'
   async_status:
     jid: "{{ ubuntu_sleeper.ansible_job_id }}"
   register: ubuntu_job_result

@@ -9,13 +9,6 @@
       - "Refer to {{ KB_SUPPORTED_EA_OS }} for more details."
   when: (not ansible_facts['distribution_major_version'] in REDHAT_MAJOR)
 
-- name: Detecting operating system minor version number
-  fail:
-    msg:
-      - "This machine's operating system ({{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }}) is unsupported by ThousandEyes."
-      - "Refer to {{ KB_SUPPORTED_EA_OS }} for more details."
-  when: (REDHAT_MINOR < "8" and ansible_facts['distribution_major_version'] == "7" and ansible_facts['distribution'] != "Amazon")
-
 - name: Gather the rpm package facts
   package_facts:
     manager: auto
@@ -31,7 +24,7 @@
   when: (ansible_facts['distribution_major_version'] == "8" and ansible_facts['distribution'] == "OracleLinux")
 
 - assert:
-    that: oraclelinux_release_version.stdout is version('8.4', '>=')
+    that: oraclelinux_release_version.stdout is version('8.8', '>=')
     fail_msg:
       - "This machine's operating system ({{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }}) is unsupported by ThousandEyes."
       - "Refer to {{ KB_SUPPORTED_EA_OS }} for more details."
@@ -39,23 +32,7 @@
   when: (ansible_facts['distribution_major_version'] == "8" and ansible_facts['distribution'] == "OracleLinux")
 
 - assert:
-    that: ansible_facts.packages['centos-stream-release'][0].version < "8.0"
-    fail_msg:
-      - "This machine's operating system ({{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }}) is unsupported by ThousandEyes."
-      - "Refer to {{ KB_SUPPORTED_EA_OS }} for more details."
-    quiet: true
-  when: (ansible_facts['distribution_major_version'] == "8" and ansible_facts['distribution'] == "CentOS" and ansible_facts.packages['centos-stream-release'] is defined)
-
-- assert:
-    that: ansible_facts.packages['centos-linux-release'][0].version < "8.0"
-    fail_msg:
-      - "This machine's operating system ({{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }}) is unsupported by ThousandEyes."
-      - "Refer to {{ KB_SUPPORTED_EA_OS }} for more details."
-    quiet: true
-  when: (ansible_facts['distribution_major_version'] == "8" and ansible_facts['distribution'] == "CentOS" and ansible_facts.packages['centos-linux-release'] is defined)
-
-- assert:
-    that: ansible_facts.packages['redhat-release'][0].version >= "8.4" and ansible_facts.packages['redhat-release'][0].version != "8.5"
+    that: ansible_facts.packages['redhat-release'][0].version >= "8.8" and ansible_facts.packages['redhat-release'][0].version != "8.9"
     fail_msg:
       - "This machine's operating system ({{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }}) is unsupported by ThousandEyes."
       - "Refer to {{ KB_SUPPORTED_EA_OS }} for more details."
@@ -63,22 +40,12 @@
   when: (ansible_facts['distribution_major_version'] == "8" and ansible_facts['distribution'] == "RedHat" and ansible_facts.packages['redhat-release'] is defined)
 
 - assert:
-    that: ansible_facts.packages['oraclelinux-release'][0].version >= "8.4" and ansible_facts.packages['oraclelinux-release'][0].version != "8.5"
+    that: ansible_facts.packages['oraclelinux-release'][0].version >= "8.8" and ansible_facts.packages['oraclelinux-release'][0].version != "8.9"
     fail_msg:
       - "This machine's operating system ({{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }}) is unsupported by ThousandEyes."
       - "Refer to {{ KB_SUPPORTED_EA_OS }} for more details."
     quiet: true
   when: (ansible_facts['distribution_major_version'] == "8" and ansible_facts['distribution'] == "OracleLinux" and ansible_facts.packages['oraclelinux-release'] is defined)
-
-- name: Detecting Redhat Desktop operating system
-  shell: rpm -q {{ item }}
-  register: rpm_query_output
-  args:
-    executable: /bin/bash
-    warn: no
-  failed_when: rpm_query_output.rc == 0
-  loop: "{{ REDHAT_DESKTOP }}"
-  when: (SKIP_DESKTOP_CHECK == "no")
 
 - name: Adding ThousandEyes repository for CentOS/AmazonLinux
   yum_repository:
@@ -125,11 +92,7 @@
   include_tasks: rhel_optional.yml
   when: (ansible_facts['distribution'] == "RedHat") and (SKIP_REPO_CREATION == "no")
 
-- name: Include Oracle Linux 7 operating system specific tasks
-  include_tasks: oracle_optional.yml
-  when: (ansible_facts['distribution'] == "OracleLinux") and (INSTALL_BROWSERBOT == "yes") and (SKIP_REPO_CREATION == "no") and (SKIP_ORACLE_OPTIONAL_REPO == "no") and (ansible_facts['distribution_major_version'] == "7")
-  
-- name: 
+- name:
   blockinfile:
     path: /etc/yum.conf
     create: yes

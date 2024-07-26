@@ -9,24 +9,17 @@
     state: latest
   when: (ansible_facts['distribution'] == "RedHat" or ansible_facts['distribution'] == "OracleLinux" or ansible_facts['distribution'] == "Amazon")
 
-# CentOS doesn't have any package security metadata
-- name: Installing all updates on CentOS
-  yum:
-    name: '*'
-    state: latest
-  when: (ansible_facts['distribution'] == "CentOS")
-
 - name: Installing security updates on Ubuntu
   block:
-    - name: Make a copy of security repos - Ubuntu 18
+    - name: Make a copy of security repos - Ubuntu 22
       blockinfile:
         path: /etc/apt/sources.list.d/ansible.security.sources.list
         create: yes
         block: |
-          deb http://us.archive.ubuntu.com/ubuntu bionic-security main restricted
-          deb http://us.archive.ubuntu.com/ubuntu bionic-security universe
-          deb http://us.archive.ubuntu.com/ubuntu bionic-security multiverse
-      when: (ansible_facts['distribution_release'] == "bionic")
+          deb http://us.archive.ubuntu.com/ubuntu jammy-security main restricted
+          deb http://us.archive.ubuntu.com/ubuntu jammy-security universe
+          deb http://us.archive.ubuntu.com/ubuntu jammy-security multiverse
+      when: (ansible_facts['distribution_release'] == "jammy")
 
     - name: Make a copy of security repos - Ubuntu 20
       blockinfile:
