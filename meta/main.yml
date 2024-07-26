@@ -36,11 +36,11 @@ galaxy_info:
         - all
     - name: EL
       versions:
-        - 7
         - 8
     - name: Ubuntu
       versions:
         - focal
+        - jammy
 
   galaxy_tags:
     - thousandeyes
