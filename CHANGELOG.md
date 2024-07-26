@@ -3,6 +3,13 @@
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 and [human-readable changelog](https://keepachangelog.com/en/1.0.0/).
 
+## 1.0.7
+### Added
+- Support for Ubuntu 22.04 LTS
+### Deprecated
+- Support for CentOS/RHEL/Oracle Linux 7
+- Desktop OS detection
+
 ## 1.0.6
 ### Deprecated
 - Support for Ubuntu 18.04 LTS

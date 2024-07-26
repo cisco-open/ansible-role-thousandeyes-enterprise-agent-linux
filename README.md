@@ -11,7 +11,7 @@ The tasks in this Ansible role are inheriting the logic from the official [shell
 ## Requirements
 
 - Ansible 2.9
-- Supported hosts OS: Ubuntu 20.04 LTS, CentOS 7.9, RHEL 7.9/8, Oracle Linux 7.9/8, Amazon Linux 2. Although not mandatory, all OS minimal server images are preferred.
+- Supported hosts OS: Ubuntu 20.04/22.04 LTS, RHEL/Oracle Linux 8, Amazon Linux 2. Although not mandatory, all OS minimal server images are preferred.
 
 ## Installation
 
@@ -67,9 +67,7 @@ INSTALL_LOG:
 |REDHAT_REPOSITORY|String|Repository for RPM|`https://yum.thousandeyes.com`|Repository URL|
 |DEBIAN_REPOSITORY|String|Repository for DEB|`https://apt.thousandeyes.com/`|Repository URL|
 |SKIP_REPO_CREATION|String|Skip the repository creation|`no`|`yes`,`no`|
-|SKIP_ORACLE_OPTIONAL_REPO|String|Skip adding the Oracle Linux 7 Addons repository|`no`|`yes`,`no`|[Oracle Linux 7 Addons repository]|
 |RHN_REGISTER|String|Register RHEL with RedHat Network|`yes`|`yes`,`no`|[Register RHEL with RedHat Network]|
-|SKIP_REDHAT_OPTIONAL_REPO|String|Skip rhel-7-server-extras-rpms repository|`no`|`yes`,`no`|[RHEL 7 Extras repository]|
 |RHN_USERNAME|String|RedHat Network username|`""`|RHN username
 |RHN_PASSWORD|String|RedHat Network password|`""`|RHN password
 |RHN_POOL_ID1|String|Subscribe to a specific pool by ID|`""`|RHN Pool ID
@@ -77,7 +75,6 @@ INSTALL_LOG:
 |MEM_AGENT_BBOT|Integer|Check recommended memory with Browserbot|`2048`|Integer greater than recommended value|[Enterprise Agent hardware requirements]|
 |MEM_AGENT|Integer|Check recommended memory Agent only|`1024`|Integer greater than recommended value|[Enterprise Agent hardware requirements]|
 |CPU_CORE_COUNT|Integer|Check recommended CPU count|`2`|Integer greater than recommended value|[Enterprise Agent hardware requirements]|
-|SKIP_DESKTOP_CHECK|String|Skip desktop OS software checks|`no`|`yes`,`no`|Skip desktop OS detection|
 |START_SERVICE|String|Start te-agent service|`yes`|`yes`,`no`|Delay registering the agent until next restart|
 
 ## Example Playbook
@@ -118,6 +115,7 @@ More details:
 
 ### Todos
 The following are work in progress new features :
+-  Add support for RHEL/Rocky 9
 -  [Add CA root certificates to system certificate store](https://docs.thousandeyes.com/product-documentation/enterprise-agents/installing-ca-certificates-on-enterprise-agents)
 -  [Add CA root certificates to Browserbot](https://docs.thousandeyes.com/product-documentation/enterprise-agents/installing-ca-certificates-on-enterprise-agents)
 
