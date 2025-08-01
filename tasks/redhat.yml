@@ -12,7 +12,7 @@
 - name: Gather the rpm package facts
   package_facts:
     manager: auto
-  when: (ansible_facts['distribution_major_version'] == "8" and ansible_facts['distribution'] != "OracleLinux")
+  when: ((ansible_facts['distribution_major_version'] == "8" or ansible_facts['distribution_major_version'] == "9") and ansible_facts['distribution'] != "OracleLinux")
 
 - name: Get OracleLinux version
   command: rpm -q --qf '%{version}' oraclelinux-release
@@ -21,18 +21,18 @@
   register: oraclelinux_release_version
   changed_when: false
   check_mode: false
-  when: (ansible_facts['distribution_major_version'] == "8" and ansible_facts['distribution'] == "OracleLinux")
+  when: (ansible_facts['distribution_major_version'] >= "8" and ansible_facts['distribution'] == "OracleLinux")
 
 - assert:
-    that: oraclelinux_release_version.stdout is version('8.8', '>=')
+    that: oraclelinux_release_version.stdout is version('8.10', '==')
     fail_msg:
       - "This machine's operating system ({{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }}) is unsupported by ThousandEyes."
       - "Refer to {{ KB_SUPPORTED_EA_OS }} for more details."
     quiet: true
-  when: (ansible_facts['distribution_major_version'] == "8" and ansible_facts['distribution'] == "OracleLinux")
+  when: (ansible_facts['distribution_major_version'] >= "8" and ansible_facts['distribution'] == "OracleLinux")
 
 - assert:
-    that: ansible_facts.packages['redhat-release'][0].version >= "8.8" and ansible_facts.packages['redhat-release'][0].version != "8.9"
+    that: ansible_facts.packages['redhat-release'][0].version == "8.10"
     fail_msg:
       - "This machine's operating system ({{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }}) is unsupported by ThousandEyes."
       - "Refer to {{ KB_SUPPORTED_EA_OS }} for more details."
@@ -40,14 +40,30 @@
   when: (ansible_facts['distribution_major_version'] == "8" and ansible_facts['distribution'] == "RedHat" and ansible_facts.packages['redhat-release'] is defined)
 
 - assert:
-    that: ansible_facts.packages['oraclelinux-release'][0].version >= "8.8" and ansible_facts.packages['oraclelinux-release'][0].version != "8.9"
+    that: ansible_facts.packages['redhat-release'][0].version >= "9.6" and ansible_facts.packages['redhat-release'][0].version != "9.7" and ansible_facts.packages['redhat-release'][0].version < "10.0"
     fail_msg:
       - "This machine's operating system ({{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }}) is unsupported by ThousandEyes."
       - "Refer to {{ KB_SUPPORTED_EA_OS }} for more details."
     quiet: true
-  when: (ansible_facts['distribution_major_version'] == "8" and ansible_facts['distribution'] == "OracleLinux" and ansible_facts.packages['oraclelinux-release'] is defined)
+  when: (ansible_facts['distribution_major_version'] == "9" and ansible_facts['distribution'] == "RedHat" and ansible_facts.packages['redhat-release'] is defined)
 
-- name: Adding ThousandEyes repository for CentOS/AmazonLinux
+- assert:
+    that: ansible_facts.packages['rocky-release'][0].version >= "9.6" and ansible_facts.packages['rocky-release'][0].version != "9.7" and ansible_facts.packages['rocky-release'][0].version < "10.0"
+    fail_msg:
+      - "This machine's operating system ({{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }}) is unsupported by ThousandEyes."
+      - "Refer to {{ KB_SUPPORTED_EA_OS }} for more details."
+    quiet: true
+  when: (ansible_facts['distribution_major_version'] == "9" and ansible_facts['distribution'] == "Rocky" and ansible_facts.packages['rocky-release'] is defined)
+
+- assert:
+    that: ansible_facts.packages['oraclelinux-release'][0].version == "8.10"
+    fail_msg:
+      - "This machine's operating system ({{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }}) is unsupported by ThousandEyes."
+      - "Refer to {{ KB_SUPPORTED_EA_OS }} for more details."
+    quiet: true
+  when: (ansible_facts['distribution_major_version'] >= "8" and ansible_facts['distribution'] == "OracleLinux" and ansible_facts.packages['oraclelinux-release'] is defined)
+
+- name: Adding ThousandEyes repository for AmazonLinux
   yum_repository:
     name: thousandeyes
     description: ThousandEyes
@@ -58,7 +74,7 @@
     owner: root
     group: root
     mode: 0644
-  when: (SKIP_REPO_CREATION == "no") and (ansible_facts['distribution'] == "CentOS" or ansible_facts['distribution'] == "Amazon")
+  when: (SKIP_REPO_CREATION == "no") and (ansible_facts['distribution'] == "Amazon")
 
 - name: Adding ThousandEyes repository for RedHat/OracleLinux
   yum_repository:

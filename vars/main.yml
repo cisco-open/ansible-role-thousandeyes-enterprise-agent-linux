@@ -14,6 +14,10 @@ ACCOUNT_TOKEN: "<account-token>"
 CRASH_REPORTS: "1"
 CRASH_REPORTS_SUPPORTED: ['0', '1']
 
+# FIPS Security mode. Supported values: DEFAULT or FIPS
+SECURITY_MODE: "DEFAULT"
+SECURITY_MODE_SUPPORTED: ['DEFAULT', 'FIPS']
+
 # BrowserBot component is installed by default. Set the value to "no" to skip the BrowserBot installation.
 # If BrowserBot is already installed, the "no" value won't uninstall it.
 # BrowserBot is not supported on Amazon Linux 2
@@ -134,10 +138,10 @@ REDHAT_MINOR: "{{ ansible_facts['distribution_version'][2:3] }}"
 UBUNTU_LSB_DESCRIPTION: "{{ ansible_facts['lsb']['description'] }}"
 
 # Supported distributions
-REDHAT_MAJOR: ['8', '2']
-SUPPORTED_DISTRIBUTIONS: ['RedHat', 'OracleLinux', 'Amazon', 'Ubuntu']
-SUPPORTED_REDHAT_DISTRIBUTIONS: ['RedHat', 'OracleLinux', 'Amazon']
-SUPPORTED_UBUNTU_DISTRIBUTIONS: ['focal', 'jammy']
+REDHAT_MAJOR: ['9', '8', '2', '2023']
+SUPPORTED_DISTRIBUTIONS: ['RedHat', 'Rocky', 'OracleLinux', 'Amazon', 'Ubuntu']
+SUPPORTED_REDHAT_DISTRIBUTIONS: ['RedHat', 'Rocky', 'OracleLinux', 'Amazon']
+SUPPORTED_UBUNTU_DISTRIBUTIONS: ['jammy', 'noble']
 
 # The default log path for te-agent is /var/log
 TEAGENT_LOG: "/var/log"

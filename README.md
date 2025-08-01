@@ -11,7 +11,7 @@ The tasks in this Ansible role are inheriting the logic from the official [shell
 ## Requirements
 
 - Ansible 2.9
-- Supported hosts OS: Ubuntu 20.04/22.04 LTS, RHEL/Oracle Linux 8, Amazon Linux 2. Although not mandatory, all OS minimal server images are preferred.
+- Supported hosts OS: Ubuntu 22.04 LTS, Ubuntu 24.04 LTS, RHEL/Oracle Linux 8, RHEL/Rocky 9, Amazon Linux 2, Amazon Linux 2023. Although not mandatory, all OS minimal server images are preferred.
 
 ## Installation
 
@@ -56,6 +56,7 @@ INSTALL_LOG:
 |KDC_PORT|String|Kerberos port|`88`|Other port number|
 |KERBEROS_RDNS|String|Disable reverse DNS lookup in Kerberos auth|`1`|`0`,`1`|[Kerberos RDNS configuration]|
 |KERBEROS_WHITELIST|String|Kerberos whitelist|`""`|IP address range or subnet
+|SECURITY_MODE|String|FIPS Security mode|`DEFAULT`|`DEFAULT`,`FIPS`|[FIPS security mode]
 |APT_PROXY_HOSTNAME|String|APT Proxy hostname|`""`|`IP`,`hostname`|[Proxy settings for apt package manager]|
 |APT_PROXY_PORT|String|APT Proxy port|`80`|Other port number|
 |APT_PROXY_USERNAME|String|APT Proxy username|`""`|Valid proxy credentials|
@@ -115,7 +116,7 @@ More details:
 
 ### Todos
 The following are work in progress new features :
--  Add support for RHEL/Rocky 9
+-  Add support for Ubuntu 22.04/24.04 LTS arm64
 -  [Add CA root certificates to system certificate store](https://docs.thousandeyes.com/product-documentation/enterprise-agents/installing-ca-certificates-on-enterprise-agents)
 -  [Add CA root certificates to Browserbot](https://docs.thousandeyes.com/product-documentation/enterprise-agents/installing-ca-certificates-on-enterprise-agents)
 
@@ -158,6 +159,8 @@ All rights reserved.
 [Enterprise Agent Deployment post-install]: <https://docs.thousandeyes.com/product-documentation/enterprise-agents/enterprise-agent-deployment-using-linux-package-method#post-installation>
 
 [Kerberos RDNS configuration]: <https://docs.thousandeyes.com/release-notes/2019/2019-08-20-release-notes#kerberos-rdns-configuration>
+
+[FIPS security mode]: <https://docs.thousandeyes.com/whats-new/changelog#id-2025-07-24>
 
 [Proxy settings for apt package manager]: <https://docs.thousandeyes.com/product-documentation/enterprise-agents/configuring-an-enterprise-agent-to-use-a-proxy-server#configuring-proxy-settings-for-the-apt-package-manager-on-ubuntu>
 
