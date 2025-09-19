@@ -3,6 +3,18 @@
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 and [human-readable changelog](https://keepachangelog.com/en/1.0.0/).
 
+## 1.0.9
+### Added
+- Support for AlmaLinux 8/9
+
+## 1.0.8
+### Added
+- Support for Ubuntu 24.04 LTS
+- Support for RHEL 9
+- Support for Rocky 9
+- Support for Amazon Linux 2023
+- Support for FIPS security mode
+
 ## 1.0.7
 ### Added
 - Support for Ubuntu 22.04 LTS

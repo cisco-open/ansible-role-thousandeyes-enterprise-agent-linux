@@ -16,15 +16,6 @@
       - "Refer to {{ KB_SUPPORTED_EA_OS }} for more details."
   when: not UBUNTU_LSB_DESCRIPTION is search("LTS")
 
-- name: Detecting Ubuntu Desktop operating system
-  shell: dpkg-query -W {{ item }}
-  register: dpkg_query_output
-  args:
-    executable: /bin/bash
-  failed_when: dpkg_query_output.rc == 0
-  loop: "{{ UBUNTU_DESKTOP }}"
-  when: (SKIP_DESKTOP_CHECK == "no")
-
 - name: Configuring apt proxy
   template:
     src: 90proxyapt.j2

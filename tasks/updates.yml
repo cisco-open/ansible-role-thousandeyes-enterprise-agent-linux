@@ -21,15 +21,15 @@
           deb http://us.archive.ubuntu.com/ubuntu jammy-security multiverse
       when: (ansible_facts['distribution_release'] == "jammy")
 
-    - name: Make a copy of security repos - Ubuntu 20
+    - name: Make a copy of security repos - Ubuntu 24
       blockinfile:
         path: /etc/apt/sources.list.d/ansible.security.sources.list
         create: yes
         block: |
-          deb http://us.archive.ubuntu.com/ubuntu focal-security main restricted
-          deb http://us.archive.ubuntu.com/ubuntu focal-security universe
-          deb http://us.archive.ubuntu.com/ubuntu focal-security multiverse
-      when: (ansible_facts['distribution_release'] == "focal")
+          deb http://us.archive.ubuntu.com/ubuntu noble-security main restricted
+          deb http://us.archive.ubuntu.com/ubuntu noble-security universe
+          deb http://us.archive.ubuntu.com/ubuntu noble-security multiverse
+      when: (ansible_facts['distribution_release'] == "noble")
 
     - name: Only run "update_cache=yes" if the last one is more than 10 minutes ago
       apt:

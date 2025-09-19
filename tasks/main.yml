@@ -216,6 +216,12 @@
     regexp: '^crash-reports='
     line: crash-reports={{ CRASH_REPORTS }}
 
+- name: Configuring ThousandEyes Agent - security mode
+  lineinfile:
+    path: /etc/te-agent.cfg
+    regexp: '^security-mode='
+    line: security-mode={{ SECURITY_MODE }}
+
 - name: Configuring Network Time Protocol custom servers
   template:
     src: ntp.conf.j2
