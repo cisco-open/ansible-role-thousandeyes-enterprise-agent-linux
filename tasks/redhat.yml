@@ -48,6 +48,22 @@
   when: (ansible_facts['distribution_major_version'] == "9" and ansible_facts['distribution'] == "RedHat" and ansible_facts.packages['redhat-release'] is defined)
 
 - assert:
+    that: ansible_facts.packages['almalinux-release'][0].version == "8.10"
+    fail_msg:
+      - "This machine's operating system ({{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }}) is unsupported by ThousandEyes."
+      - "Refer to {{ KB_SUPPORTED_EA_OS }} for more details."
+    quiet: true
+  when: (ansible_facts['distribution_major_version'] == "8" and ansible_facts['distribution'] == "AlmaLinux" and ansible_facts.packages['almalinux-release'] is defined)
+
+- assert:
+    that: ansible_facts.packages['almalinux-release'][0].version >= "9.6" and ansible_facts.packages['almalinux-release'][0].version != "9.7" and ansible_facts.packages['almalinux-release'][0].version < "10.0"
+    fail_msg:
+      - "This machine's operating system ({{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }}) is unsupported by ThousandEyes."
+      - "Refer to {{ KB_SUPPORTED_EA_OS }} for more details."
+    quiet: true
+  when: (ansible_facts['distribution_major_version'] == "9" and ansible_facts['distribution'] == "AlmaLinux" and ansible_facts.packages['almalinux-release'] is defined)
+
+- assert:
     that: ansible_facts.packages['rocky-release'][0].version >= "9.6" and ansible_facts.packages['rocky-release'][0].version != "9.7" and ansible_facts.packages['rocky-release'][0].version < "10.0"
     fail_msg:
       - "This machine's operating system ({{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }}) is unsupported by ThousandEyes."
@@ -87,7 +103,7 @@
     owner: root
     group: root
     mode: 0644
-  when: (SKIP_REPO_CREATION == "no") and (ansible_facts['distribution'] == "RedHat" or ansible_facts['distribution'] == "OracleLinux")
+  when: (SKIP_REPO_CREATION == "no") and (ansible_facts['distribution'] == "RedHat" or ansible_facts['distribution'] == "OracleLinux" or ansible_facts['distribution'] == "AlmaLinux" or ansible_facts['distribution'] == "RockyLinux")
 
 - name: Copying the ThousandEyes public key
   copy:

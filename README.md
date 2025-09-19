@@ -11,7 +11,7 @@ The tasks in this Ansible role are inheriting the logic from the official [shell
 ## Requirements
 
 - Ansible 2.9
-- Supported hosts OS: Ubuntu 22.04 LTS, Ubuntu 24.04 LTS, RHEL/Oracle Linux 8, RHEL/Rocky 9, Amazon Linux 2, Amazon Linux 2023. Although not mandatory, all OS minimal server images are preferred.
+- Supported hosts OS: Ubuntu 22.04 LTS, Ubuntu 24.04 LTS, RHEL/Oracle Linux/AlmaLinux 8, RHEL/Rocky/AlmaLinux 9, Amazon Linux 2, Amazon Linux 2023. Although not mandatory, all OS minimal server images are preferred.
 
 ## Installation
 

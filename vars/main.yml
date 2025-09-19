@@ -139,8 +139,8 @@ UBUNTU_LSB_DESCRIPTION: "{{ ansible_facts['lsb']['description'] }}"
 
 # Supported distributions
 REDHAT_MAJOR: ['9', '8', '2', '2023']
-SUPPORTED_DISTRIBUTIONS: ['RedHat', 'Rocky', 'OracleLinux', 'Amazon', 'Ubuntu']
-SUPPORTED_REDHAT_DISTRIBUTIONS: ['RedHat', 'Rocky', 'OracleLinux', 'Amazon']
+SUPPORTED_DISTRIBUTIONS: ['RedHat', 'Rocky', 'AlmaLinux', 'OracleLinux', 'Amazon', 'Ubuntu']
+SUPPORTED_REDHAT_DISTRIBUTIONS: ['RedHat', 'Rocky', 'AlmaLinux', 'OracleLinux', 'Amazon']
 SUPPORTED_UBUNTU_DISTRIBUTIONS: ['jammy', 'noble']
 
 # The default log path for te-agent is /var/log
