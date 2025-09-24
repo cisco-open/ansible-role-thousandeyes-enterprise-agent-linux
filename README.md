@@ -25,7 +25,7 @@ git clone https://github.com/cisco-open/ansible-role-thousandeyes-enterprise-age
 
 ## Role Variables
 
-`Before running this role, please review and set the appropriate variables. E.g. vars/main.yml`
+`Before running this role, please review and set the appropriate variables. E.g. defaults/main.yml`
 
 INSTALL_LOG:
 
@@ -40,8 +40,8 @@ INSTALL_LOG:
 |CRASH_REPORTS|String|Enables or disables crash reports|`1`|`0`,`1`|[Crash Reporting]|
 |INSTALL_BROWSERBOT|String|Installs Browserbot|`yes`|`yes`,`no`|[What is BrowserBot?]|
 |INSTALL_NTP|String|Installs NTP service|`no`|`yes`(recommended),`no`|[Enterprise Agent Deployment post-install]|
-|INSTALL_NTP_SERVER_CUSTOM1|String|Custom NTP server/pool 1|`""`|`IP`,`hostname`|Read vars/main.yml comments|
-|INSTALL_NTP_SERVER_CUSTOM2|String|Custom NTP server/pool 2|`""`|`IP`,`hostname`|Read vars/main.yml comments|
+|INSTALL_NTP_SERVER_CUSTOM1|String|Custom NTP server/pool 1|`""`|`IP`,`hostname`|Read defaults/main.yml comments|
+|INSTALL_NTP_SERVER_CUSTOM2|String|Custom NTP server/pool 2|`""`|`IP`,`hostname`|Read defaults/main.yml comments|
 |INSTALL_OS_UPDATES|String|Install operating system (security) updates|`no`|`yes`(recommended),`no`|
 |PROXY_TYPE|String|Proxy settings for ThousandEyes Agent|`DIRECT`|`DIRECT`,`STATIC`,`PAC`|[Configuring a Proxy Server]|
 |PROXY_LOCATION|String|HTTP proxy|`""`|`IP`,`hostname`,`PAC location`|[Configuring a Proxy Server]|
@@ -103,11 +103,11 @@ install_thousandeyes.yml
 #    - other-roles
 ```
 ## Example using Ansible Vault
-vars/main.yml contains sensitive information like Account Group token or credentials.
+defaults/main.yml contains sensitive information like Account Group token or credentials.
 
 The following example will encrypt the variables file with the password in vault_password_file
 ```bash
-ansible-vault encrypt --vault-id thousandeyes@vault_password_file vars/main.yml
+ansible-vault encrypt --vault-id thousandeyes@vault_password_file defaults/main.yml
 ansible-playbook install_thousandeyes.yml --vault-id thousandeyes@vault_password_file
 ```
 More details:
